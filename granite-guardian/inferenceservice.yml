@@ -1,0 +1,35 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  annotations:
+    openshift.io/display-name: granite-guardian-3-8b
+    serving.kserve.io/deploymentMode: RawDeployment
+  labels:
+    networking.kserve.io/visibility: exposed
+    opendatahub.io/dashboard: "true"
+  name: granite-guardian-3-8b
+  namespace: summit-connect-2025
+spec:
+  predictor:
+    automountServiceAccountToken: false
+    maxReplicas: 1
+    minReplicas: 1
+    model:
+      modelFormat:
+        name: vLLM
+      name: ""
+      resources:
+        limits:
+          cpu: "12"
+          memory: 64Gi
+          nvidia.com/gpu: "1"
+        requests:
+          cpu: "1"
+          memory: 1Gi
+          nvidia.com/gpu: "1"
+      runtime: granite-guardian-3-8b
+      storageUri: oci://quay.io/redhat-ai-services/modelcar-catalog:granite-guardian-3.3-8b
+    tolerations:
+    - effect: NoSchedule
+      key: nvidia.com/gpu
+      operator: Exists

@@ -1,0 +1,19 @@
+apiVersion: llamastack.io/v1alpha1
+kind: LlamaStackDistribution
+metadata:
+  name: llamastack
+  namespace: summit-connect-2025
+spec:
+  replicas: 1
+  server:
+    containerSpec:
+      env:
+        - name: OTEL_SERVICE_NAME
+          value: llamastack
+      name: llamastack
+      port: 8321
+    distribution:
+      # See: https://github.com/opendatahub-io/llama-stack-distribution/tree/main/distribution
+      name: rh-dev
+    userConfig:
+      configMapName: llamastack-config

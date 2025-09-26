@@ -1,0 +1,5 @@
+resources:
+  - connection-secret.yml
+  - servingruntime.yml
+  - inferenceservice.yml
+namespace: summit-connect-2025

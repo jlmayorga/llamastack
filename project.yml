@@ -1,0 +1,23 @@
+apiVersion: project.openshift.io/v1
+kind: Project
+metadata:
+  annotations:
+    openshift.io/description: ""
+    openshift.io/display-name: summit-connect-2025
+    openshift.io/requester: admin
+    openshift.io/sa.scc.mcs: s0:c30,c10
+    openshift.io/sa.scc.supplemental-groups: 1000890000/10000
+    openshift.io/sa.scc.uid-range: 1000890000/10000
+  labels:
+    kubernetes.io/metadata.name: summit-connect-2025
+    modelmesh-enabled: "false"
+    opendatahub.io/dashboard: "true"
+    openshift-pipelines.tekton.dev/namespace-reconcile-version: 1.17.2
+    pod-security.kubernetes.io/audit: baseline
+    pod-security.kubernetes.io/audit-version: latest
+    pod-security.kubernetes.io/warn: baseline
+    pod-security.kubernetes.io/warn-version: latest
+  name: summit-connect-2025
+spec:
+  finalizers:
+  - kubernetes

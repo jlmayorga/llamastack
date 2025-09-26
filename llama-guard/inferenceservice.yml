@@ -1,0 +1,39 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  annotations:
+    openshift.io/display-name: llama-guard-3-1b
+    serving.kserve.io/deploymentMode: RawDeployment
+  labels:
+    networking.kserve.io/visibility: exposed
+    opendatahub.io/dashboard: "true"
+  name: llama-guard-3-1b
+  namespace: summit-connect-2025
+spec:
+  predictor:
+    automountServiceAccountToken: false
+    maxReplicas: 1
+    minReplicas: 1
+    model:
+      args:
+      # See: https://docs.vllm.ai/en/v0.8.3/serving/openai_compatible_server.html#vllm-serve
+        - '--served-model-name=meta-llama/Llama-Guard-3-1B'
+      modelFormat:
+        name: vLLM
+      name: ""
+      resources:
+        limits:
+          cpu: "12"
+          memory: 64Gi
+          nvidia.com/gpu: "1"
+        requests:
+          cpu: "1"
+          memory: 1Gi
+          nvidia.com/gpu: "1"
+      runtime: llama-guard-3-1b
+      storageUri: oci://quay.io/rh-aiservices-bu/llama-guard-3-1b-modelcar:2.0.0
+      #storageUri: oci://quay.io/redhat-telco-adoption/llama-guard-3-1b-modelcar:latest
+    tolerations:
+    - effect: NoSchedule
+      key: nvidia.com/gpu
+      operator: Exists
