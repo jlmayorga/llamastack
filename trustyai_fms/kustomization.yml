@@ -1,0 +1,4 @@
+resources:
+  - configmap.yml
+  - guardrailsorchestrator.yml
+namespace: summit-connect-2025

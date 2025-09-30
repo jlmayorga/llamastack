@@ -6,6 +6,7 @@ apis:
 - eval
 - inference
 - safety
+- shields
 - scoring
 - tool_runtime
 - vector_io
@@ -63,12 +64,17 @@ providers:
         type: sqlite
         namespace: null
         db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/remote-vllm}/localfs_datasetio.db
-  
   safety:
   - provider_id: llama-guard
     provider_type: inline::llama-guard
     config:
       excluded_categories: []
+  - provider_id: trustyai_fms
+    provider_type: remote::trustyai_fms
+    config:
+      orchestrator_url: ${env.FMS_ORCHESTRATOR_URL:=}
+      ssl_cert_path: ${env.FMS_SSL_CERT_PATH:=}
+      shields: {}
   scoring:
   - provider_id: basic
     provider_type: inline::basic
@@ -123,8 +129,10 @@ datasets: []
 vector_dbs: []
 scoring_fns: []
 benchmarks: []
-shields:
-- shield_id: meta-llama/Llama-Guard-3-1B
+shields: []
+#- shield_id: email_hap
+#  provider_id: trustyai_fms
+#- shield_id: meta-llama/Llama-Guard-3-1B
 tool_groups:
 - provider_id: tavily-search
   toolgroup_id: builtin::websearch
@@ -138,3 +146,4 @@ tool_groups:
 #   provider_id: model-context-protocol
 #   mcp_endpoint:
 #     uri: "http://slack-mcp-server:80/sse"
+external_providers_dir: /opt/app-root/src/.llama/providers.d

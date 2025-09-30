@@ -4,7 +4,7 @@ resources:
 configMapGenerator:
 - name: llamastack-config
   files:
-  - llama-guard/run.yaml
+    - llama-guard/run.yaml
 generatorOptions:
   disableNameSuffixHash: true
   labels:

@@ -23,6 +23,7 @@ Resources
 - https://github.com/opendatahub-io/llama-stack-distribution/blob/rhoai-v2.22/redhat-distribution/run.yaml
 - https://github.com/opendatahub-io/llama-stack-k8s-operator/blob/odh/release/operator.yaml
 - https://github.com/redhat-ai-services/modelcar-catalog
+- https://docs.nvidia.com/datacenter/cloud-native/openshift/latest/steps-overview.html
 
 
 
