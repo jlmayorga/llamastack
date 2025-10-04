@@ -69,12 +69,12 @@ providers:
     provider_type: inline::llama-guard
     config:
       excluded_categories: []
-  - provider_id: trustyai_fms
-    provider_type: remote::trustyai_fms
-    config:
-      orchestrator_url: ${env.FMS_ORCHESTRATOR_URL:=}
-      ssl_cert_path: ${env.FMS_SSL_CERT_PATH:=}
-      shields: {}
+  #- provider_id: trustyai_fms
+  #  provider_type: remote::trustyai_fms
+  #  config:
+  #    orchestrator_url: ${env.FMS_ORCHESTRATOR_URL:=}
+  #    ssl_cert_path: ${env.FMS_SSL_CERT_PATH:=}
+  #    shields: {}
   scoring:
   - provider_id: basic
     provider_type: inline::basic
@@ -129,10 +129,10 @@ datasets: []
 vector_dbs: []
 scoring_fns: []
 benchmarks: []
-shields: []
+shields:
 #- shield_id: email_hap
 #  provider_id: trustyai_fms
-#- shield_id: meta-llama/Llama-Guard-3-1B
+  - shield_id: meta-llama/Llama-Guard-3-1B
 tool_groups:
 - provider_id: tavily-search
   toolgroup_id: builtin::websearch

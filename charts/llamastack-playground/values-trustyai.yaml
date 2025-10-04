@@ -1,0 +1,104 @@
+# Overrides to deploy the TrustyAI sample variant of the LlamaStack Playground
+# These values mirror the manifests under llamastack-playground-trustyai/
+
+# Use a meaningful name for the TrustyAI variant (no "-sample")
+nameOverride: "llamastack-playground-trustyai"
+fullnameOverride: ""
+
+# Container-specific overrides for the TrustyAI sample
+container:
+  # Use a sensible container name; resource names will include the trustyai suffix via nameOverride
+  name: llamastack-playground
+  # Keep ports and other env the same as defaults, but point to the TrustyAI LlamaStackDistribution service
+  env:
+    STREAMLIT_BROWSER_GATHER_USAGE_STATS: "false"
+    STREAMLIT_SERVER_ADDRESS: "0.0.0.0"
+    STREAMLIT_SERVER_PORT: "8501"
+    # Point to the TrustyAI-enabled LlamaStackDistribution sample service
+    LLAMA_STACK_ENDPOINT: "http://llamastackdistribution-sample-service:8321"
+    DEFAULT_MODEL: "llama32-3b"
+  envExtra: []
+
+# Service settings remain the same as the base chart (ClusterIP on port 80 -> containerPort 8501)
+service:
+  type: ClusterIP
+  port: 80
+  targetPortName: http
+
+# Expose via OpenShift Route (same TLS settings as base chart)
+route:
+  enabled: true
+  host: ""
+  tls:
+    enabled: true
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  annotations: {}
+  labels: {}
+
+# Resources and probes follow the base defaults to match the sample manifests
+resources:
+  limits:
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# Keep serviceAccount creation; the name will follow nameOverride
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+# Optional selectors/affinity can be inherited; keep empty as in base
+nodeSelector: {}
+
+image:
+  repository: quay.io/rh-aiservices-bu/llama-stack-playground
+  tag: ""   # Use chart appVersion by default
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+podAnnotations: {}
+podLabels: {}
+
+commonLabels: {}
+
+securityContext:
+  pod: { runAsNonRoot: true }
+  container: {
+    allowPrivilegeEscalation: false,
+    readOnlyRootFilesystem: false,
+    runAsNonRoot: true,
+    capabilities: { drop: ["ALL"] }
+  }
+
+labels:
+  deployment: {}
+  service: {}
+  route: {}
+annotations:
+  deployment: {}
+  service: {}
+  route: {}

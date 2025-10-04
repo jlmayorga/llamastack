@@ -2,12 +2,12 @@ apiVersion: serving.kserve.io/v1beta1
 kind: InferenceService
 metadata:
   annotations:
-    openshift.io/display-name: llama32-3b
+    openshift.io/display-name: granite-4-0-h-tiny
     serving.kserve.io/deploymentMode: RawDeployment
   labels:
     networking.kserve.io/visibility: exposed
     opendatahub.io/dashboard: "true"
-  name: llama32-3b
+  name: granite-4-0-h-tiny
   namespace: summit-connect-2025
 spec:
   predictor:
@@ -21,14 +21,14 @@ spec:
       resources:
         limits:
           cpu: "2"
-          memory: 16Gi
+          memory: 8Gi
           nvidia.com/gpu: "1"
         requests:
           cpu: "2"
-          memory: 16Gi
+          memory: 8Gi
           nvidia.com/gpu: "1"
-      runtime: llama32-3b
-      storageUri: oci://quay.io/redhat-ai-services/modelcar-catalog:llama-3.2-3b-instruct
+      runtime: granite-4-0-h-tiny
+      storageUri: oci://quay.io/redhat-ai-services/modelcar-catalog:granite-4.0-h-micro
     tolerations:
     - effect: NoSchedule
       key: nvidia.com/gpu

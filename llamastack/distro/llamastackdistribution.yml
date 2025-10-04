@@ -1,0 +1,17 @@
+apiVersion: llamastack.io/v1alpha1
+kind: LlamaStackDistribution
+metadata:
+  name: llamastackdistribution-all
+  namespace: summit-connect-2025
+spec:
+  replicas: 1
+  server:
+    containerSpec:
+      name: llama-stack
+      port: 8321
+    distribution:
+      name: rh-dev
+    userConfig:
+      configMapName: llamastack-all-config
+    storage:
+      size: 20Gi

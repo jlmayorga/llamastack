@@ -1,0 +1,163 @@
+version: '2'
+image_name: rh
+apis:
+- agents
+- datasetio
+- eval
+- inference
+- safety
+- scoring
+- telemetry
+- tool_runtime
+- vector_io
+providers:
+  inference:
+  - provider_id: vllm-inference
+    provider_type: remote::vllm
+    config:
+      url: 'http://llama32-3b-predictor:8080/v1'
+      max_tokens: 4096
+      api_token: fake
+      tls_verify: false
+  - provider_id: sentence-transformers
+    provider_type: inline::sentence-transformers
+    config: {}
+  - provider_id: vllm-safety
+    provider_type: remote::vllm
+    config:
+      url: 'http://llama-guard-3-1b-predictor:8080/v1'
+      max_tokens: 4096
+      api_token: ${env.VLLM_API_TOKEN:fake}
+      tls_verify: false
+  safety:
+    - provider_id: trustyai_fms
+      provider_type: remote::trustyai_fms
+      config:
+        orchestrator_url: 'http://guardrails-orchestrator-service:8033'
+        shields:
+          regex_detector:
+            type: content
+            confidence_threshold: 0.5
+            message_types: [ "system", "user", "completion" ]
+            detectors:
+              regex:
+                detector_params:
+                  regex: [ "email", "ssn", "credit-card", "^verypersonal$" ]
+
+    - provider_id: llama-guard
+      provider_type: inline::llama-guard
+      config:
+        excluded_categories: [ ]
+        shields:
+          test_shield:
+            type: content
+            confidence_threshold: 0.5
+            message_types: [ "system", "user", "completion" ]
+
+  agents:
+  - provider_id: meta-reference
+    provider_type: inline::meta-reference
+    config:
+      persistence_store:
+        type: sqlite
+        namespace: null
+        db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/rh}/agents_store.db
+      responses_store:
+        type: sqlite
+        db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/rh}/responses_store.db
+  eval:
+  - provider_id: trustyai_lmeval
+    provider_type: remote::trustyai_lmeval
+    config:
+        use_k8s: True
+        base_url: 'http://llama32-3b-predictor:8080/v1'
+  datasetio:
+  - provider_id: huggingface
+    provider_type: remote::huggingface
+    config:
+      kvstore:
+        type: sqlite
+        namespace: null
+        db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/rh}/huggingface_datasetio.db
+  - provider_id: localfs
+    provider_type: inline::localfs
+    config:
+      kvstore:
+        type: sqlite
+        namespace: null
+        db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/rh}/localfs_datasetio.db
+  scoring:
+  - provider_id: basic
+    provider_type: inline::basic
+    config: {}
+  - provider_id: llm-as-judge
+    provider_type: inline::llm-as-judge
+    config: {}
+  - provider_id: braintrust
+    provider_type: inline::braintrust
+    config:
+      openai_api_key: ${env.OPENAI_API_KEY:}
+  telemetry:
+  - provider_id: meta-reference
+    provider_type: inline::meta-reference
+    config:
+      service_name: "${env.OTEL_SERVICE_NAME:\u200B}"
+      sinks: console,sqlite
+      sqlite_db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/rh}/trace_store.db
+  tool_runtime:
+  - provider_id: brave-search
+    provider_type: remote::brave-search
+    config:
+      api_key: ${env.BRAVE_SEARCH_API_KEY:}
+      max_results: 3
+  - provider_id: tavily-search
+    provider_type: remote::tavily-search
+    config:
+      api_key: ${env.TAVILY_SEARCH_API_KEY:}
+      max_results: 3
+  - provider_id: rag-runtime
+    provider_type: inline::rag-runtime
+    config: {}
+  - provider_id: model-context-protocol
+    provider_type: remote::model-context-protocol
+    config: {}
+metadata_store:
+  type: sqlite
+  db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/rh}/registry.db
+inference_store:
+  type: sqlite
+  db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/rh}/inference_store.db
+models:
+- metadata: {}
+  model_id: ${env.INFERENCE_MODEL}
+  provider_id: vllm-inference
+  model_type: llm
+- metadata:
+    embedding_dimension: 768
+  model_id: granite-embedding-125m
+  provider_id: sentence-transformers
+  provider_model_id: ibm-granite/granite-embedding-125m-english
+  model_type: embedding
+- metadata: {}
+  model_id: meta-llama/Llama-Guard-3-1B
+  #provider_model_id: llama-guard-3-1b
+  provider_id: vllm-safety
+  model_type: llm
+shields:
+  - shield_id: llama-guard
+    provider_id: llama-guard
+    provider_shield_id: meta-llama/Llama-Guard-3-1B
+  - shield_id: regex_detector
+    provider_id: trustyai_fms
+vector_dbs: []
+datasets: []
+scoring_fns: []
+benchmarks: []
+tool_groups:
+- toolgroup_id: builtin::websearch
+  provider_id: tavily-search
+- toolgroup_id: builtin::rag
+  provider_id: rag-runtime
+server:
+  port: 8321
+external_providers_dir: /opt/app-root/src/.llama/providers.d

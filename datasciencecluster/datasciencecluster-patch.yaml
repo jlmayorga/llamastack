@@ -1,0 +1,6 @@
+spec:
+  components:
+    trustyai:
+      managementState: Managed
+    llamastackoperator:
+      managementState: Managed

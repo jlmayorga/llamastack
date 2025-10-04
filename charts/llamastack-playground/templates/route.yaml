@@ -1,0 +1,30 @@
+{{- if .Values.route.enabled }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ include "llamastack-playground.fullname" . }}
+  labels:
+    {{- include "llamastack-playground.labels" . | nindent 4 }}
+    {{- with .Values.labels.route }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.annotations.route }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  to:
+    kind: Service
+    name: {{ include "llamastack-playground.fullname" . }}
+    weight: 100
+  port:
+    targetPort: {{ .Values.container.portName }}
+  {{- if .Values.route.host }}
+  host: {{ .Values.route.host | quote }}
+  {{- end }}
+  {{- if .Values.route.tls.enabled }}
+  tls:
+    termination: {{ .Values.route.tls.termination }}
+    insecureEdgeTerminationPolicy: {{ .Values.route.tls.insecureEdgeTerminationPolicy }}
+  {{- end }}
+{{- end }}

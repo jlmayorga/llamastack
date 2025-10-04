@@ -1,0 +1,24 @@
+Thank you for installing {{ .Chart.Name }}!
+
+This chart deploys the LlamaStack Playground UI.
+
+Accessing the app:
+  - Namespace: {{ .Release.Namespace }}
+  - Release:  {{ .Release.Name }}
+
+{{- if .Values.route.enabled }}
+An OpenShift Route has been created. To get the URL:
+  oc -n {{ .Release.Namespace }} get route {{ include "llamastack-playground.fullname" . }} -o jsonpath='{.spec.host}'
+Then open:
+  https://$(oc -n {{ .Release.Namespace }} get route {{ include "llamastack-playground.fullname" . }} -o jsonpath='{.spec.host}')/
+{{- else }}
+No Route was created (route.enabled=false). Use one of the following:
+  - Port-forward:
+      kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "llamastack-playground.fullname" . }} 8080:{{ .Values.service.port }}
+      Open http://localhost:8080
+  - Or expose via Ingress/Route separately.
+{{- end }}
+
+Troubleshooting:
+  - Check pod status: kubectl -n {{ .Release.Namespace }} get pods -l app.kubernetes.io/instance={{ .Release.Name }}
+  - View logs:        kubectl -n {{ .Release.Namespace }} logs deploy/{{ include "llamastack-playground.fullname" . }}
