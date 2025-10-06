@@ -1,0 +1,17 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: llamastack-playground-trustyai
+  labels:
+    app.kubernetes.io/name: llamastack-playground-trustyai
+    app.kubernetes.io/version: "latest"
+spec:
+  to:
+    kind: Service
+    name: llamastack-playground-trustyai
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

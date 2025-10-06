@@ -7,17 +7,15 @@
 5. oc patch dsc default-dsc --type='merge' --patch-file datasciencecluster/datasciencecluster-patch.yaml
 6. create project summit-connect-2025
 7. Apply all the resources
-   - `oc apply -k trustyai_fms`
-   - `oc apply -k llama-3`
-   - 
+   - `oc apply -k demo`
+
 > [! IMPORTANT]
 > Important: Scale down the GPU MachineSet to 0 every day to avoid wasteful charges
 > ```
 > oc scale $(oc get machineset -n openshift-machine-api -o name | grep gpu) --replicas=0 -n openshift-machine-api
 > ```
 
-## TODO
-- Implement guardrails with [TrustyAI FMS](https://trustyai.org/docs/main/trustyai-fms-lls-tutorial)
+
 
 Resources
 

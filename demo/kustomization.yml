@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - models/llama-3
+#  - ../llama-guard
+#  - ../llamastack/llama-guard
+#  - ../llamastack-playground
+  - llamastack/llamastack-trustyai-fms
+  - llamastack/playground
+  - trustyai/trustyai_fms
+
+namespace: summit-connect-2025

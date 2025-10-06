@@ -1,0 +1,20 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    haproxy.router.openshift.io/timeout: 30s
+  labels:
+    inferenceservice-name: granite-4-0-h-micro
+  name: granite-4-0-h-micro
+  namespace: summit-connect-2025
+spec:
+  port:
+    targetPort: http
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: granite-4-0-h-micro-predictor
+    weight: 100
+  wildcardPolicy: None

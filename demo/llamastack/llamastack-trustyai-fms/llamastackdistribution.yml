@@ -1,0 +1,26 @@
+apiVersion: llamastack.io/v1alpha1
+kind: LlamaStackDistribution
+metadata:
+  name: llamastack-trustyai-fms
+  namespace: summit-connect-2025
+spec:
+  replicas: 1
+  server:
+    containerSpec:
+      env:
+        - name: VLLM_URL
+          value: 'http://llama32-1b-predictor.summit-connect-2025.svc.cluster.local:8080/v1'
+        - name: INFERENCE_MODEL
+          value: 'llama32-1b'
+        - name: MILVUS_DB_PATH
+          value: '~/.llama/milvus.db'
+        - name: VLLM_TLS_VERIFY
+          value: 'false'
+        - name: FMS_ORCHESTRATOR_URL
+          value: 'http://guardrails-orchestrator-service:8033'
+      name: llama-stack
+      port: 8321
+    distribution:
+      name: rh-dev
+    storage:
+      size: 20Gi
