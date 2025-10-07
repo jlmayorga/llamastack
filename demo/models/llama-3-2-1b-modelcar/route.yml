@@ -1,0 +1,20 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    haproxy.router.openshift.io/timeout: 30s
+  labels:
+    inferenceservice-name: llama32-1b-modelcar
+  name: llama32-1b-modelcar
+  namespace: summit-connect-2025
+spec:
+  port:
+    targetPort: http
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: llama32-1b-modelcar-predictor
+    weight: 100
+  wildcardPolicy: None

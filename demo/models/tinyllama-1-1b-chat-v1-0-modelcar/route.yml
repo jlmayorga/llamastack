@@ -1,0 +1,20 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    haproxy.router.openshift.io/timeout: 30s
+  labels:
+    inferenceservice-name: tinyllama-1-1b-chat-v1-0-modelcar
+  name: tinyllama-1-1b-chat-v1-0-modelcar
+  namespace: summit-connect-2025
+spec:
+  port:
+    targetPort: http
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: tinyllama-1-1b-chat-v1-0-modelcar-predictor
+    weight: 100
+  wildcardPolicy: None

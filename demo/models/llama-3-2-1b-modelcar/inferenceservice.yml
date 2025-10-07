@@ -1,0 +1,35 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  annotations:
+    openshift.io/display-name: llama32-1b-modelcar
+    serving.kserve.io/deploymentMode: RawDeployment
+  labels:
+    networking.kserve.io/visibility: exposed
+    opendatahub.io/dashboard: "true"
+  name: llama32-1b-modelcar
+  namespace: summit-connect-2025
+spec:
+  predictor:
+    automountServiceAccountToken: false
+    maxReplicas: 1
+    minReplicas: 1
+    model:
+      modelFormat:
+        name: vLLM
+      name: ""
+      resources:
+        limits:
+          cpu: "2"
+          memory: 10Gi
+          nvidia.com/gpu: "1"
+        requests:
+          cpu: "2"
+          memory: 10Gi
+          nvidia.com/gpu: "1"
+      runtime: llama32-1b-modelcar
+      storageUri: oci://quay.io/redhat-telco-adoption/llama-3-2-1b-modelcar:latest
+    tolerations:
+    - effect: NoSchedule
+      key: nvidia.com/gpu
+      operator: Exists
