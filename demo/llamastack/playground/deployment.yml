@@ -42,7 +42,7 @@ spec:
         - name: LLAMA_STACK_ENDPOINT
           value: "http://llamastack-trustyai-fms-service.summit-connect-2025.svc.cluster.local:8321"
         - name: DEFAULT_MODEL
-          value: "llama32-1b"
+          value: "tinyllama-1b"
         livenessProbe:
           failureThreshold: 3
           httpGet:

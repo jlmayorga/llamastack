@@ -4,8 +4,8 @@ metadata:
   annotations:
     haproxy.router.openshift.io/timeout: 30s
   labels:
-    inferenceservice-name: llama32-1b-modelcar
-  name: llama32-1b-modelcar
+    inferenceservice-name: tinyllama-1b
+  name: tinyllama-1b
   namespace: summit-connect-2025
 spec:
   port:
@@ -15,6 +15,6 @@ spec:
     termination: edge
   to:
     kind: Service
-    name: llama32-1b-modelcar-predictor
+    name: tinyllama-1b-predictor
     weight: 100
   wildcardPolicy: None

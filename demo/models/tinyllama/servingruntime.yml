@@ -10,10 +10,10 @@ metadata:
     opendatahub.io/serving-runtime-scope: global
     opendatahub.io/template-display-name: vLLM NVIDIA GPU ServingRuntime for KServe
     opendatahub.io/template-name: vllm-cuda-runtime
-    openshift.io/display-name: tinyllama-1-1b-chat-v1-0-modelcar
+    openshift.io/display-name: tinyllama-1b
   labels:
     opendatahub.io/dashboard: "true"
-  name: tinyllama-1-1b-chat-v1-0-modelcar
+  name: tinyllama-1b
   namespace: summit-connect-2025
 spec:
   annotations:
@@ -24,6 +24,9 @@ spec:
     - --port=8080
     - --model=/mnt/models
     - --served-model-name={{.Name}}
+    - --max-model-len=2048
+    - --gpu-memory-utilization=0.85
+    - --dtype=half
     command:
     - python
     - -m

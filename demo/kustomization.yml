@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - models/llama-3
+  - models/tinyllama
 #  - ../llama-guard
 #  - ../llamastack/llama-guard
 #  - ../llamastack-playground

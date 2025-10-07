@@ -2,12 +2,12 @@ apiVersion: serving.kserve.io/v1beta1
 kind: InferenceService
 metadata:
   annotations:
-    openshift.io/display-name: llama32-1b-modelcar
+    openshift.io/display-name: tinyllama-1b
     serving.kserve.io/deploymentMode: RawDeployment
   labels:
     networking.kserve.io/visibility: exposed
     opendatahub.io/dashboard: "true"
-  name: llama32-1b-modelcar
+  name: tinyllama-1b
   namespace: summit-connect-2025
 spec:
   predictor:
@@ -21,14 +21,14 @@ spec:
       resources:
         limits:
           cpu: "2"
-          memory: 10Gi
+          memory: 6Gi
           nvidia.com/gpu: "1"
         requests:
-          cpu: "2"
-          memory: 10Gi
+          cpu: "1"
+          memory: 4Gi
           nvidia.com/gpu: "1"
-      runtime: llama32-1b-modelcar
-      storageUri: oci://quay.io/redhat-telco-adoption/llama-3-2-1b-modelcar:latest
+      runtime: tinyllama-1b
+      storageUri: oci://quay.io/redhat-ai-services/modelcar-catalog:tinyllama-1.1b-chat-v1.0
     tolerations:
     - effect: NoSchedule
       key: nvidia.com/gpu
