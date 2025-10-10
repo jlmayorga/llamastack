@@ -446,11 +446,11 @@ def show_compliance_savings():
             <div style='background: white; padding: 25px; border-radius: 10px; 
                         border-left: 5px solid #e74c3c; box-shadow: 0 2px 8px rgba(0,0,0,0.08);'>
                 <div style='font-size: 40px; font-weight: 700; color: #e74c3c; margin-bottom: 8px;'>
-                    $4.88M
+                    $4.4M
                 </div>
                 <div style='color: #666; font-size: 15px; line-height: 1.5;'>
                     Average cost of a data breach<br>
-                    <small style='color: #999;'>(IBM Security Report 2024)</small>
+                    <small style='color: #999;'><a href="https://www.ibm.com/reports/data-breach">(IBM Security Report 2025)</a></small>
                 </div>
             </div>
             <div style='background: white; padding: 25px; border-radius: 10px; 
@@ -570,11 +570,11 @@ def create_interactive_tester(client, model_name: str = "tinyllama-1b"):
                     params={}
                 )
 
-                if result.violation:
+                if result.violation and result.violation.violation_level == 'error':
                     display(HTML(f"""
                     <div style='background: #ffebee; border-left: 5px solid #f44336; 
-                                padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);'>
-                        <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 12px;'>
+                                padding: 20px; border-radius: 8px;'>
+                        <div style='display: flex; align-items: center; gap: 12px;'>
                             <div style='font-size: 32px;'>🛡️</div>
                             <div style='color: #c62828; font-weight: 700; font-size: 20px;'>
                                 BLOCKED BY SHIELD
@@ -582,22 +582,22 @@ def create_interactive_tester(client, model_name: str = "tinyllama-1b"):
                         </div>
                         <div style='margin-left: 44px; color: #555; line-height: 1.6;'>
                             <strong>Reason:</strong> {result.violation.user_message}<br>
-                            <strong>Action:</strong> Message was not processed by the model
+                            <strong>Metadata:</strong> {result.violation.metadata.get('summary', {}).get('messages_with_violations', 0)} violations detected
                         </div>
                     </div>
                     """))
                 else:
                     display(HTML("""
                     <div style='background: #e8f5e9; border-left: 5px solid #4caf50; 
-                                padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);'>
-                        <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 12px;'>
+                                padding: 20px; border-radius: 8px;'>
+                        <div style='display: flex; align-items: center; gap: 12px;'>
                             <div style='font-size: 32px;'>✅</div>
                             <div style='color: #2e7d32; font-weight: 700; font-size: 20px;'>
                                 ALLOWED
                             </div>
                         </div>
-                        <div style='margin-left: 44px; color: #555; line-height: 1.6;'>
-                            Message passed all shield checks and would be processed normally
+                        <div style='margin-left: 44px; color: #555;'>
+                            Message passed all shield checks
                         </div>
                     </div>
                     """))
