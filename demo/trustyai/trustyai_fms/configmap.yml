@@ -12,3 +12,10 @@ data:
             port: 8080
         chunker_id: whole_doc_chunker
         default_threshold: 0.5
+      hap:
+        type: text_contents
+        service: 
+          hostname: "granite-guardian-hap-38m-predictor"
+          port: 8000
+        chunker_id: whole_doc_chunker
+        default_threshold: 0.5

@@ -6,4 +6,5 @@ spec:
   orchestratorConfig: "fms-orchestr8-config-nlp"
   enableBuiltInDetectors: true
   enableGuardrailsGateway: false
+  otelexporter: {}
   replicas: 1

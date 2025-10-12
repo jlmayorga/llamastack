@@ -1,0 +1,4 @@
+resources:
+- servingruntime.yml
+- inferenceservice.yml
+namespace: summit-connect-2025
