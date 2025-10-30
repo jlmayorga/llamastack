@@ -13,7 +13,7 @@ spec:
           # Alternative: llama32-1b (better quality, requires 1 GPU)
           # Uses OpenShift Route with HTTPS for external access
           # Get route: oc get route tinyllama-1b-predictor -n summit-connect-2025 -o jsonpath='{.spec.host}'
-          value: 'https://tinyllama-1b-predictor-summit-connect-2025.apps.CLUSTER_DOMAIN/v1'
+          value: 'http://tinyllama-1b-predictor:8080/v1'
         - name: INFERENCE_MODEL
           value: 'tinyllama-1b'
         - name: MILVUS_DB_PATH
