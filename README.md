@@ -318,7 +318,7 @@ oc scale $(oc get machineset -n openshift-machine-api -o name | grep gpu) --repl
    # Deploy and use llama32-1b instead
    oc apply -k demo/models/llama-3/
    oc patch llamastackdistribution llamastack-trustyai-fms -n summit-connect-2025 --type='json' -p='[
-     {"op": "replace", "path": "/spec/server/containerSpec/env/0/value", "value": "http://llama32-1b-predictor.summit-connect-2025.svc.cluster.local:8080/v1"},
+     {"op": "replace", "path": "/spec/server/containerSpec/env/0/value", "value": "http://llama32-1b-predictor:8080/v1"},
      {"op": "replace", "path": "/spec/server/containerSpec/env/1/value", "value": "llama32-1b"}
    ]'
    ```
@@ -339,7 +339,7 @@ oc scale $(oc get machineset -n openshift-machine-api -o name | grep gpu) --repl
    ```bash
    # If tinyllama-1b is running (default)
    oc patch llamastackdistribution llamastack-trustyai-fms -n summit-connect-2025 --type='json' -p='[
-     {"op": "replace", "path": "/spec/server/containerSpec/env/0/value", "value": "http://tinyllama-1b-predictor.summit-connect-2025.svc.cluster.local:8080/v1"},
+     {"op": "replace", "path": "/spec/server/containerSpec/env/0/value", "value": "http://tinyllama-1b-predictor:8080/v1"},
      {"op": "replace", "path": "/spec/server/containerSpec/env/1/value", "value": "tinyllama-1b"}
    ]'
    ```

@@ -40,7 +40,7 @@ To use Llama 3.2 instead of TinyLlama:
    oc patch llamastackdistribution llamastack-trustyai-fms \
      -n summit-connect-2025 --type='json' -p='[
      {"op": "replace", "path": "/spec/server/containerSpec/env/0/value",
-      "value": "http://llama32-1b-predictor.summit-connect-2025.svc.cluster.local:8080/v1"},
+      "value": "http://llama32-1b-predictor:8080/v1"},
      {"op": "replace", "path": "/spec/server/containerSpec/env/1/value",
       "value": "llama32-1b"}
    ]'

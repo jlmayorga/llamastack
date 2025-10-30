@@ -11,8 +11,8 @@ spec:
         - name: VLLM_URL
           # Default to tinyllama-1b (faster deployment, requires 1 GPU)
           # Alternative: llama32-1b (better quality, requires 1 GPU)
-          # Uses OpenShift Route with HTTPS for external access
-          # Get route: oc get route tinyllama-1b-predictor -n summit-connect-2025 -o jsonpath='{.spec.host}'
+          # Uses internal service name (same namespace) on port 8080
+          # For llama32-1b: http://llama32-1b-predictor:8080/v1
           value: 'http://tinyllama-1b-predictor:8080/v1'
         - name: INFERENCE_MODEL
           value: 'tinyllama-1b'

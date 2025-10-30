@@ -56,7 +56,7 @@ LlamaStack uses tinyllama-1b by default. To switch to Llama 3.2:
 oc patch llamastackdistribution llamastack-trustyai-fms \
   -n summit-connect-2025 --type='json' -p='[
   {"op": "replace", "path": "/spec/server/containerSpec/env/0/value",
-   "value": "http://llama32-1b-predictor.summit-connect-2025.svc.cluster.local:8080/v1"},
+   "value": "http://llama32-1b-predictor:8080/v1"},
   {"op": "replace", "path": "/spec/server/containerSpec/env/1/value",
    "value": "llama32-1b"}
 ]'
