@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Dual GPU deployment - deploys both llama32-1b and tinyllama-1b
+# Requires 2 GPU nodes to be available
+# Scale up GPU nodes: oc scale $(oc get machineset -n openshift-machine-api -o name | grep gpu) --replicas=2 -n openshift-machine-api
+
+namespace: summit-connect-2025
+
+resources:
+  - ../../models/llama-3
+  - ../../models/tinyllama
+  - ../../llamastack/llamastack-trustyai-fms
+  - ../../llamastack/playground
+  - ../../trustyai/trustyai_fms
+
+# Both models deployed for testing/comparison
+# Note: This requires 2 GPU nodes to avoid resource exhaustion

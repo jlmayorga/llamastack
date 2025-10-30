@@ -1,0 +1,296 @@
+---
+- name: Bootstrap OpenShift Cluster for LlamaStack Demo
+  hosts: localhost
+  gather_facts: true
+  vars:
+    # Target versions
+    target_openshift_ai_version: "2.25"
+    target_channel: "stable"
+
+    # Namespaces
+    rhods_operator_namespace: "redhat-ods-operator"
+    demo_namespace: "summit-connect-2025"
+
+    # GPU configuration
+    gpu_machineset_replicas: 1
+    gpu_instance_type: "g6e.2xlarge"  # AWS instance type
+
+    # Timeouts (in seconds)
+    operator_timeout: 600
+    pod_ready_timeout: 1200
+
+  tasks:
+    - name: Verify oc CLI is available
+      command: oc version
+      register: oc_version
+      changed_when: false
+      failed_when: oc_version.rc != 0
+
+    - name: Debug oc version output
+      debug:
+        var: oc_version
+
+    - name: Display OpenShift version
+      debug:
+        msg: "OpenShift version: {{ oc_version.stdout_lines[0] }}"
+
+    - name: Check if logged into OpenShift
+      command: oc whoami
+      register: oc_user
+      changed_when: false
+      failed_when: oc_user.rc != 0
+
+    - name: Display current user
+      debug:
+        msg: "Logged in as: {{ oc_user.stdout }}"
+
+    # OpenShift AI Operator Check and Upgrade
+    - name: Check if OpenShift AI operator is installed
+      kubernetes.core.k8s_info:
+        api_version: operators.coreos.com/v1alpha1
+        kind: Subscription
+        name: rhods-operator
+        namespace: "{{ rhods_operator_namespace }}"
+      register: rhods_subscription
+      failed_when: false
+
+    - name: Fail if OpenShift AI is not installed
+      fail:
+        msg: "OpenShift AI operator is not installed. Please install it first via OperatorHub."
+      when: rhods_subscription.resources | length == 0
+
+    - name: Get current OpenShift AI version
+      shell: |
+        oc get csv -n {{ rhods_operator_namespace }} | grep rhods-operator | awk '{print $1}'
+      register: current_csv
+      changed_when: false
+
+    - name: Display current OpenShift AI version
+      debug:
+        msg: "Current OpenShift AI CSV: {{ current_csv.stdout }}"
+
+    - name: Check if upgrade is needed
+      set_fact:
+        upgrade_needed: "{{ target_openshift_ai_version not in current_csv.stdout }}"
+
+    - name: Get available channels for OpenShift AI
+      shell: |
+        oc get packagemanifest rhods-operator -n openshift-marketplace -o jsonpath='{.status.channels[*].name}'
+      register: available_channels
+      changed_when: false
+      when: upgrade_needed | bool
+
+    - name: Display available channels
+      debug:
+        msg: "Available channels: {{ available_channels.stdout }}"
+      when: upgrade_needed | bool
+
+    - name: Patch subscription to target channel
+      kubernetes.core.k8s:
+        api_version: operators.coreos.com/v1alpha1
+        kind: Subscription
+        name: rhods-operator
+        namespace: "{{ rhods_operator_namespace }}"
+        definition:
+          spec:
+            channel: "{{ target_channel }}"
+      when: upgrade_needed | bool
+
+    - name: Wait for OpenShift AI upgrade to complete
+      shell: |
+        oc get csv -n {{ rhods_operator_namespace }} | grep rhods-operator | grep -i succeeded
+      register: csv_ready
+      retries: 60
+      delay: 10
+      until: csv_ready.rc == 0
+      when: upgrade_needed | bool
+
+    - name: Get updated OpenShift AI version
+      shell: |
+        oc get csv -n {{ rhods_operator_namespace }} | grep rhods-operator | awk '{print $1}'
+      register: updated_csv
+      changed_when: false
+
+    - name: Display updated OpenShift AI version
+      debug:
+        msg: "OpenShift AI version after upgrade: {{ updated_csv.stdout }}"
+
+    # Enable LlamaStack Operator
+    - name: Check if DataScienceCluster exists
+      kubernetes.core.k8s_info:
+        api_version: datasciencecluster.opendatahub.io/v1
+        kind: DataScienceCluster
+        name: default-dsc
+      register: dsc_info
+
+    - name: Enable LlamaStack and TrustyAI components in DataScienceCluster
+      kubernetes.core.k8s:
+        state: patched
+        api_version: datasciencecluster.opendatahub.io/v1
+        kind: DataScienceCluster
+        name: default-dsc
+        definition:
+          spec:
+            components:
+              llamastackoperator:
+                managementState: Managed
+              trustyai:
+                managementState: Managed
+      when: dsc_info.resources | length > 0
+
+    - name: Wait for LlamaStack operator to be ready
+      shell: |
+        oc get deployment llama-stack-k8s-operator-controller-manager -n redhat-ods-applications -o jsonpath='{.status.availableReplicas}' 2>/dev/null || echo "0"
+      register: llamastack_ready
+      retries: 30
+      delay: 10
+      until: llamastack_ready.stdout | int > 0
+      when: dsc_info.resources | length > 0
+      failed_when: false
+
+    - name: Verify LlamaStack CRDs are available
+      shell: |
+        oc api-resources | grep llamastackdistributions
+      register: llamastack_crds
+      retries: 10
+      delay: 5
+      until: llamastack_crds.rc == 0
+      when: dsc_info.resources | length > 0
+      failed_when: false
+
+    - name: Wait for TrustyAI operator to be ready
+      shell: |
+        oc get deployment trustyai-service-operator-controller-manager -n redhat-ods-applications -o jsonpath='{.status.availableReplicas}' 2>/dev/null || echo "0"
+      register: trustyai_ready
+      retries: 30
+      delay: 10
+      until: trustyai_ready.stdout | int > 0
+      when: dsc_info.resources | length > 0
+      failed_when: false
+
+    - name: Verify TrustyAI GuardrailsOrchestrator CRD is available
+      shell: |
+        oc api-resources | grep guardrailsorchestrators
+      register: trustyai_crds
+      retries: 20
+      delay: 10
+      until: trustyai_crds.rc == 0
+      when: dsc_info.resources | length > 0
+      failed_when: false
+
+    - name: Display TrustyAI operator status
+      debug:
+        msg: "TrustyAI operator is {{ 'ready' if trustyai_ready.stdout | default('0') | int > 0 else 'not ready' }}"
+      when: dsc_info.resources | length > 0
+
+    # Node Feature Discovery and NVIDIA GPU Operator
+    - name: Check if Node Feature Discovery operator is installed
+      kubernetes.core.k8s_info:
+        api_version: operators.coreos.com/v1alpha1
+        kind: Subscription
+        name: nfd
+        namespace: openshift-nfd
+      register: nfd_subscription
+      failed_when: false
+
+    - name: Display NFD status
+      debug:
+        msg: "Node Feature Discovery operator {{ 'is' if nfd_subscription.resources | length > 0 else 'is NOT' }} installed"
+
+    - name: Check if NVIDIA GPU operator is installed
+      kubernetes.core.k8s_info:
+        api_version: operators.coreos.com/v1alpha1
+        kind: Subscription
+        namespace: nvidia-gpu-operator
+      register: nvidia_subscription
+      failed_when: false
+
+    - name: Display NVIDIA GPU operator status
+      debug:
+        msg: "NVIDIA GPU operator {{ 'is' if nvidia_subscription.resources | length > 0 else 'is NOT' }} installed"
+
+    - name: Warning if GPU operators not installed
+      debug:
+        msg: "WARNING: GPU operators (NFD/NVIDIA) are not installed. Models requiring GPU will not work. Please install via OperatorHub."
+      when:
+        - nfd_subscription.resources | length == 0 or nvidia_subscription.resources | length == 0
+
+    # GPU MachineSet Configuration
+    - name: Get GPU machinesets
+      shell: |
+        oc get machineset -n openshift-machine-api -o name | grep gpu || true
+      register: gpu_machinesets
+      changed_when: false
+
+    - name: Check GPU machineset replica count
+      shell: |
+        oc get {{ gpu_machinesets.stdout_lines[0] }} -n openshift-machine-api -o jsonpath='{.spec.replicas}'
+      register: current_replicas
+      changed_when: false
+      when: gpu_machinesets.stdout_lines | length > 0
+
+    - name: Display GPU machineset status
+      debug:
+        msg: "GPU machineset {{ gpu_machinesets.stdout_lines[0] if gpu_machinesets.stdout_lines | length > 0 else 'NOT FOUND' }} - Current replicas: {{ current_replicas.stdout if gpu_machinesets.stdout_lines | length > 0 else 'N/A' }}"
+      when: gpu_machinesets.stdout_lines | length > 0
+
+    - name: Scale up GPU nodes (if scaled down)
+      shell: |
+        oc scale {{ gpu_machinesets.stdout_lines[0] }} --replicas={{ gpu_machineset_replicas }} -n openshift-machine-api
+      when:
+        - gpu_machinesets.stdout_lines | length > 0
+        - current_replicas.stdout | int == 0
+      register: scale_result
+
+    - name: Wait for GPU nodes to be ready
+      shell: |
+        oc wait --for=condition=Ready node -l node-role.kubernetes.io/worker --timeout=10m
+      when: scale_result is changed
+      failed_when: false
+
+    # Create demo namespace
+    - name: Create demo namespace
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: "{{ demo_namespace }}"
+            labels:
+              opendatahub.io/dashboard: "true"
+              modelmesh-enabled: "false"
+              name: "{{ demo_namespace }}"
+
+    # Verify prerequisites
+    - name: Check cluster storage classes
+      kubernetes.core.k8s_info:
+        api_version: storage.k8s.io/v1
+        kind: StorageClass
+      register: storage_classes
+
+    - name: Display available storage classes
+      debug:
+        msg: "Available storage classes: {{ storage_classes.resources | map(attribute='metadata.name') | list }}"
+
+    - name: Verify sufficient storage is available
+      debug:
+        msg: "Please ensure ~100GB of storage is available for model serving"
+
+    # Summary
+    - name: Display bootstrap summary
+      debug:
+        msg:
+          - "==================================================="
+          - "Bootstrap Complete!"
+          - "==================================================="
+          - "OpenShift AI Version: {{ updated_csv.stdout }}"
+          - "LlamaStack Operator: {{ 'Enabled' if dsc_info.resources | length > 0 else 'Not configured' }}"
+          - "Demo Namespace: {{ demo_namespace }}"
+          - "GPU Nodes: {{ current_replicas.stdout if gpu_machinesets.stdout_lines | length > 0 else 'Not configured' }}"
+          - ""
+          - "Next steps:"
+          - "  1. Deploy the demo: oc apply -k demo/"
+          - "  2. Monitor deployment: oc get pods -n {{ demo_namespace }} -w"
+          - "  3. Access playground: oc get route llamastack-playground-trustyai -n {{ demo_namespace }}"
+          - "==================================================="

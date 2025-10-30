@@ -4,8 +4,8 @@ metadata:
   annotations:
     haproxy.router.openshift.io/timeout: 30s
   labels:
-    inferenceservice-name: llama-guard-3-1b
-  name: llama-guard-3-1b
+    inferenceservice-name: llama32-1b
+  name: llama32-1b-predictor
   namespace: summit-connect-2025
 spec:
   port:
@@ -15,6 +15,6 @@ spec:
     termination: edge
   to:
     kind: Service
-    name: llama-guard-3-1b-predictor
+    name: llama32-1b-predictor
     weight: 100
   wildcardPolicy: None

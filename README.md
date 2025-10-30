@@ -98,30 +98,61 @@ Use the Red Hat Demo Platform catalog item:
 
 Or configure your own cluster with GPU support.
 
-### 2. Upgrade OpenShift AI
+### 2. Bootstrap the Cluster (Automated)
+
+**RECOMMENDED**: Use the automated bootstrap playbook to prepare your cluster:
 
 ```bash
-# Ensure you're running OpenShift AI 2.23.0
-# Via OperatorHub: OpenShift AI Operator → Fast channel → 2.23.0
+cd bootstrap/
+make bootstrap
 ```
 
-### 3. Enable LlamaStack Operator
+This will automatically:
+- Upgrade OpenShift AI to 2.23.0 if needed
+- Enable the LlamaStack operator
+- Verify GPU operators (NFD, NVIDIA)
+- Scale up GPU nodes
+- Create the demo namespace
+
+See [bootstrap/README.md](bootstrap/README.md) for details.
+
+**OR** manually configure (skip if you used bootstrap):
+
+<details>
+<summary>Manual Setup Steps</summary>
+
+#### 2a. Upgrade OpenShift AI
 
 ```bash
-# Patch the DataScienceCluster to enable LlamaStack
-oc patch datasciencecluster default-dsc --type='merge' -p '{"spec":{"components":{"llamastack":{"managementState":"Managed"}}}}'
+# Check current version
+oc get csv -n redhat-ods-operator | grep rhods-operator
+
+# Upgrade to 2.23.0 if needed
+oc patch subscription rhods-operator -n redhat-ods-operator --type='merge' \
+  -p '{"spec":{"channel":"fast"}}'
 ```
 
-### 4. Create Project
+#### 2b. Enable LlamaStack Operator
+
+```bash
+oc patch datasciencecluster default-dsc --type='merge' \
+  -p '{"spec":{"components":{"llamastack":{"managementState":"Managed"}}}}'
+```
+
+#### 2c. Create Project
 
 ```bash
 oc apply -f project.yml
 ```
 
-### 5. Deploy Everything
+</details>
+
+### 3. Deploy the Demo
+
+**Default: Single GPU deployment** (recommended for cost optimization)
 
 ```bash
-# Deploy all components using Kustomize
+# Deploy with single GPU configuration (tinyllama-1b only)
 oc apply -k demo/
 
 # Monitor deployment
@@ -129,17 +160,30 @@ oc get pods -n summit-connect-2025 -w
 ```
 
 This will deploy:
-- Model serving runtime (vLLM)
-- Llama 3.2 1B inference service
+- TinyLlama 1B inference service (requires 1 GPU, faster deployment)
 - TrustyAI Guardrails Orchestrator
-- LlamaStack distribution with TrustyAI integration
+- LlamaStack distribution (configured for tinyllama-1b)
 - LlamaStack Playground UI
+
+**Alternative: Dual GPU deployment** (for model comparison)
+
+If you have 2 GPU nodes available:
+
+```bash
+# Scale up GPU nodes first
+oc scale $(oc get machineset -n openshift-machine-api -o name | grep gpu) --replicas=2 -n openshift-machine-api
+
+# Deploy with both models
+oc apply -k demo/overlays/dual-gpu/
+```
+
+This deploys both TinyLlama 1B and Llama 3.2 1B. See [demo/overlays/dual-gpu/README.md](demo/overlays/dual-gpu/README.md) for details.
 
 ### 6. Wait for Components
 
 ```bash
 # Check model serving
-oc wait --for=condition=Ready pod -l serving.kserve.io/inferenceservice=llama32-1b -n summit-connect-2025 --timeout=10m
+oc wait --for=condition=Ready pod -l serving.kserve.io/inferenceservice=tinyllama-1b -n summit-connect-2025 --timeout=10m
 
 # Check LlamaStack
 oc wait --for=condition=Ready pod -l app.kubernetes.io/name=llamastack-trustyai-fms -n summit-connect-2025 --timeout=5m
@@ -248,6 +292,77 @@ oc scale $(oc get machineset -n openshift-machine-api -o name | grep gpu) --repl
 ```
 
 ## Troubleshooting
+
+### Pod Stuck in Pending - Insufficient GPU
+
+**Symptom**: Model predictor pod shows "Insufficient nvidia.com/gpu"
+
+**Cause**: Multiple models deployed but only 1 GPU available
+
+**Solutions**:
+1. Use single GPU deployment (default):
+   ```bash
+   oc apply -k demo/  # Only deploys tinyllama-1b
+   ```
+
+2. Or scale up GPU nodes:
+   ```bash
+   oc scale $(oc get machineset -n openshift-machine-api -o name | grep gpu) --replicas=2 -n openshift-machine-api
+   ```
+
+3. Or switch to a different model:
+   ```bash
+   # Scale down tinyllama
+   oc scale deployment tinyllama-1b-predictor -n summit-connect-2025 --replicas=0
+
+   # Deploy and use llama32-1b instead
+   oc apply -k demo/models/llama-3/
+   oc patch llamastackdistribution llamastack-trustyai-fms -n summit-connect-2025 --type='json' -p='[
+     {"op": "replace", "path": "/spec/server/containerSpec/env/0/value", "value": "http://llama32-1b-predictor.summit-connect-2025.svc.cluster.local:8080/v1"},
+     {"op": "replace", "path": "/spec/server/containerSpec/env/1/value", "value": "llama32-1b"}
+   ]'
+   ```
+
+### LlamaStack CrashLoopBackOff - Can't Connect to Model
+
+**Symptom**: LlamaStack pod shows "Failed to connect to vLLM"
+
+**Cause**: Model predictor pod is not ready or using wrong model URL
+
+**Solution**:
+1. Check which model is running:
+   ```bash
+   oc get pods -n summit-connect-2025 | grep predictor
+   ```
+
+2. Update LlamaStack to use the running model:
+   ```bash
+   # If tinyllama-1b is running (default)
+   oc patch llamastackdistribution llamastack-trustyai-fms -n summit-connect-2025 --type='json' -p='[
+     {"op": "replace", "path": "/spec/server/containerSpec/env/0/value", "value": "http://tinyllama-1b-predictor.summit-connect-2025.svc.cluster.local:8080/v1"},
+     {"op": "replace", "path": "/spec/server/containerSpec/env/1/value", "value": "tinyllama-1b"}
+   ]'
+   ```
+
+### TrustyAI GuardrailsOrchestrator CRD Not Found
+
+**Symptom**: `oc apply -k demo/trustyai/` fails with "no matches for kind GuardrailsOrchestrator"
+
+**Cause**: TrustyAI operator not enabled in DataScienceCluster
+
+**Solution**:
+```bash
+# Enable TrustyAI
+oc patch datasciencecluster default-dsc --type='merge' \
+  -p '{"spec":{"components":{"trustyai":{"managementState":"Managed"}}}}'
+
+# Wait for CRD to be available
+sleep 30
+oc api-resources | grep guardrailsorchestrators
+
+# Redeploy TrustyAI config
+oc apply -k demo/trustyai/trustyai_fms/
+```
 
 ### Model Pod Won't Start
 ```bash

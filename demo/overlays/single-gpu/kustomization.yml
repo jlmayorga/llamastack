@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Single GPU deployment - only deploys tinyllama-1b
+# Use this when you have 1 GPU node available
+# For cost optimization and faster deployment
+
+namespace: summit-connect-2025
+
+resources:
+  - ../../models/tinyllama
+  - ../../llamastack/llamastack-trustyai-fms
+  - ../../llamastack/playground
+  - ../../trustyai/trustyai_fms
+
+# Llama 3.2 is not included to avoid GPU exhaustion
+# If you need Llama 3.2, use the dual-gpu overlay or switch manually
