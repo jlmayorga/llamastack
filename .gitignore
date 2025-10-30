@@ -673,3 +673,8 @@ cython_debug/
 
 
 
+.DS_Store
+
+.claude/
+.vscode
+CLAUDE.md
