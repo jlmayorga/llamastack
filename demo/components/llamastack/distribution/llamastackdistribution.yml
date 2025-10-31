@@ -17,21 +17,22 @@ spec:
   server:
     containerSpec:
       env:
-        - name: VLLM_URL
-          # Default to tinyllama-1b (faster deployment, requires 1 GPU)
-          # Alternative: llama32-1b (better quality, requires 1 GPU)
-          # Uses internal service name (same namespace) on port 8080
-          # For llama32-1b: http://llama32-1b-predictor:8080/v1
-          value: 'http://tinyllama-1b-predictor:8080/v1'
-        - name: INFERENCE_MODEL
-          value: 'tinyllama-1b'
-        - name: MILVUS_DB_PATH
-          value: '~/.llama/milvus.db'
-        - name: VLLM_TLS_VERIFY
-          value: 'false'
-        - name: FMS_ORCHESTRATOR_URL
+      - name: VLLM_URL
+        # Default to tinyllama-1b (faster deployment, requires 1 GPU)
+        # Alternative: llama32-1b (better quality, requires 1 GPU)
+        # Uses internal service name (same namespace) on port 8080
+        # For llama32-1b: http://llama32-1b-predictor:8080/v1
+        value: 'http://tinyllama-1b-predictor:8080/v1'
+      - name: INFERENCE_MODEL
+        value: 'tinyllama-1b'
+      - name: MILVUS_DB_PATH
+        value: '~/.llama/milvus.db'
+      - name: VLLM_TLS_VERIFY
+        value: 'false'
+      - name: FMS_ORCHESTRATOR_URL
         # TODO: Figure out why using the internal service name does not work here.
-          value: 'https://guardrails-orchestrator-summit-connect-2025.apps.cluster-5j7rq.5j7rq.sandbox1562.opentlc.com'
+        value: 'https://guardrails-orchestrator-summit-connect-2025.apps.cluster-5j7rq.5j7rq.sandbox1562.opentlc.com'
+        #value: https://guardrails-orchestrator-service:8032
       name: llama-stack
       port: 8321
     distribution:
