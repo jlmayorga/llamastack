@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    openshift.io/display-name: llamastack-safety-demo-storage
+  labels:
+    opendatahub.io/dashboard: "true"
+  name: llamastack-safety-demo-storage
+  namespace: summit-connect-2025
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: gp3-csi
+  
