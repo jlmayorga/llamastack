@@ -27,6 +27,55 @@ metadata:
 spec:
   template:
     spec:
+      initContainers:
+      - name: setup-workspace
+        image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/minimal-gpu:2025.2
+        env:
+        - name: GIT_REPO_URL
+          value: "https://github.com/jlmayorga/llamastack.git"
+        - name: GIT_SSL_CAINFO
+          value: /etc/pki/tls/custom-certs/ca-bundle.crt
+        command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Init container started at $(date)"
+
+          if [ -n "$GIT_REPO_URL" ]; then
+            echo "Cloning repository from: $GIT_REPO_URL"
+
+            # Extract repo name from URL
+            REPO_NAME=$(basename "$GIT_REPO_URL" .git)
+            TARGET_DIR="/opt/app-root/src/$REPO_NAME"
+
+            # Clone only the notebooks subdirectory using sparse-checkout
+            mkdir -p "$TARGET_DIR"
+            cd "$TARGET_DIR"
+
+            git init
+            git remote add origin "$GIT_REPO_URL"
+            git config core.sparseCheckout true
+            echo "notebooks/*" >> .git/info/sparse-checkout
+
+            if git pull origin main; then
+              echo "Successfully cloned notebooks subdirectory to $TARGET_DIR"
+              ls -la "$TARGET_DIR"
+            else
+              echo "Failed to clone repository"
+              exit 1
+            fi
+          else
+            echo "No GIT_REPO_URL provided, skipping git clone"
+          fi
+
+          echo "Workspace setup complete!"
+        volumeMounts:
+        - mountPath: /opt/app-root/src/
+          name: llamastack-safety-demo-storage
+        - mountPath: /etc/pki/tls/custom-certs/ca-bundle.crt
+          name: trusted-ca
+          readOnly: true
+          subPath: ca-bundle.crt
       containers:
       - env:
         - name: NOTEBOOK_ARGS
