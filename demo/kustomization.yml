@@ -12,6 +12,7 @@ resources:
   # - models/llama-3
   - llamastack/llamastack-trustyai-fms
   - llamastack/playground
+  - llamastack/shield-registration
   - trustyai/trustyai_fms
 
 namespace: summit-connect-2025

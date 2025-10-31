@@ -1,0 +1,88 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: gpu-scale-up
+  namespace: openshift-machine-api
+  labels:
+    app: gpu-scaling-automation
+    operation: scale-up
+spec:
+  # Run at 8 AM EST (1 PM UTC) Monday-Friday
+  schedule: "0 13 * * 1-5"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: gpu-scaling-automation
+            operation: scale-up
+        spec:
+          serviceAccountName: gpu-scaler
+          restartPolicy: OnFailure
+          containers:
+          - name: scale-up
+            image: registry.redhat.io/openshift4/ose-cli:latest
+            command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+
+              echo "============================================================"
+              echo "GPU MachineSets Scale Up"
+              echo "Time: $(date)"
+              echo "============================================================"
+              echo ""
+
+              # Find GPU MachineSets
+              echo "Finding GPU MachineSets..."
+              GPU_MACHINESETS=$(oc get machinesets -n openshift-machine-api -l agnosticd.redhat.com/machineset-group=worker-gpu -o name)
+
+              if [ -z "$GPU_MACHINESETS" ]; then
+                echo "⚠ No GPU MachineSets found with label agnosticd.redhat.com/machineset-group=worker-gpu"
+                echo "Checking for GPU MachineSets by name pattern..."
+                GPU_MACHINESETS=$(oc get machinesets -n openshift-machine-api -o name | grep gpu || true)
+              fi
+
+              if [ -z "$GPU_MACHINESETS" ]; then
+                echo "✗ No GPU MachineSets found"
+                exit 1
+              fi
+
+              echo "Found GPU MachineSets:"
+              echo "$GPU_MACHINESETS"
+              echo ""
+
+              # Scale up each GPU MachineSets
+              for MACHINESET in $GPU_MACHINESETS; do
+                CURRENT_REPLICAS=$(oc get "$MACHINESET" -n openshift-machine-api -o jsonpath='{.spec.replicas}')
+                echo "→ Scaling $MACHINESET: $CURRENT_REPLICAS → 1"
+
+                oc scale "$MACHINESET" --replicas=1 -n openshift-machine-api
+
+                echo "✓ $MACHINESET scaled to 1"
+              done
+
+              echo ""
+              echo "============================================================"
+              echo "✓ GPU scale-up initiated"
+              echo "============================================================"
+              echo ""
+              echo "Note: GPU nodes may take 5-10 minutes to become ready"
+              echo ""
+
+              # Show current state
+              echo "Current GPU MachineSets state:"
+              oc get machinesets -n openshift-machine-api -l agnosticd.redhat.com/machineset-group=worker-gpu || \
+                oc get machinesets -n openshift-machine-api | grep gpu || true
+            resources:
+              requests:
+                cpu: "100m"
+                memory: "128Mi"
+              limits:
+                cpu: "200m"
+                memory: "256Mi"

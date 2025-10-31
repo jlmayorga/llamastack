@@ -259,32 +259,61 @@ Two Jupyter notebooks are included in the `notebooks/` directory:
 - Regex patterns for email, SSN, credit card
 
 ### Shield Registration
-Shields are registered programmatically via the LlamaStack API:
 
-```python
-client.shields.register(
-    shield_id="pii_shield",
-    provider_id="trustyai_fms",
-    params={
-        "type": "content",
-        "confidence_threshold": 0.8,
-        "detectors": {
-            "regex": {
-                "detector_params": {
-                    "regex": ["email", "ssn", "credit-card"]
-                }
-            }
-        }
-    }
-)
+Shields are automatically registered via a Kubernetes Job during deployment. The Job:
+- Waits for LlamaStack to be ready (up to 5 minutes)
+- Registers the PII shield (email, SSN, credit card detection)
+- Registers the HAP shield (hate, abuse, profanity detection)
+- Is idempotent (safe to re-run)
+
+Check shield registration status:
+
+```bash
+# View Job logs
+oc logs -n summit-connect-2025 job/llamastack-shield-registration
+
+# List registered shields
+oc exec -n summit-connect-2025 deployment/llamastack-trustyai-fms -- \
+  curl -s http://localhost:8321/v1/shields | jq
 ```
+
+To customize shield configurations, see [demo/llamastack/shield-registration/README.md](demo/llamastack/shield-registration/README.md).
+
+**Note**: The notebooks demonstrate programmatic registration for educational purposes, but in production, shields are registered automatically via the Job.
 
 ## Cost Management
 
-**IMPORTANT**: GPU instances are expensive. Scale down when not in use:
+**IMPORTANT**: GPU instances are expensive (~$1.50/hour). This project includes **automated GPU scaling** to reduce costs:
+
+### Automated Scaling (Recommended)
+
+Saves ~$75/week (~70% cost reduction) by scaling down during off-hours:
+
+- **Scale DOWN**: 6 PM EST weekdays
+- **Scale UP**: 8 AM EST weekdays
 
 ```bash
-# Scale down GPU MachineSets
+# Deploy GPU scaling automation
+oc apply -k demo/automation/
+
+# View CronJob schedule
+oc get cronjobs -n openshift-machine-api
+
+# Manually trigger scaling when needed
+oc create job manual-scale-down --from=cronjob/gpu-scale-down -n openshift-machine-api
+oc create job manual-scale-up --from=cronjob/gpu-scale-up -n openshift-machine-api
+```
+
+See **[demo/automation/README.md](demo/automation/README.md)** for:
+- Customizing schedules
+- Monitoring automation
+- Cost estimation details
+- Troubleshooting
+
+### Manual Scaling
+
+```bash
+# Scale down GPU MachineSets immediately
 oc scale $(oc get machineset -n openshift-machine-api -o name | grep gpu) --replicas=0 -n openshift-machine-api
 
 # Scale up when needed

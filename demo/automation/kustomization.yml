@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: openshift-machine-api
+
+resources:
+  - rbac.yml
+  - gpu-scale-down-cronjob.yml
+  - gpu-scale-up-cronjob.yml
+
+commonLabels:
+  app.kubernetes.io/name: gpu-scaling-automation
+  app.kubernetes.io/managed-by: kustomize
