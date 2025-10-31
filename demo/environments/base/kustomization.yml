@@ -9,10 +9,10 @@ namespace: summit-connect-2025
 
 resources:
   # Core infrastructure
-  - ../llamastack/llamastack-trustyai-fms
-  - ../llamastack/playground
-  - ../llamastack/shield-registration
-  - ../trustyai/trustyai_fms
-  - ../workbench
+  - ../../components/llamastack/distribution
+  - ../../components/llamastack/playground
+  - ../../components/llamastack/shields
+  - ../../components/trustyai/orchestrator
+  - ../../components/developer-tools/workbench
 
-# Model deployments are handled in overlays to support different GPU configurations
+# Model deployments are handled in environments to support different GPU configurations

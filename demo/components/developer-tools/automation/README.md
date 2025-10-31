@@ -37,7 +37,7 @@ GPU instances are expensive (~$1.50/hour for g6e.2xlarge). This automation scale
 
 ```bash
 # Deploy GPU scaling automation
-oc apply -k demo/automation/
+oc apply -k demo/components/developer-tools/automation/
 
 # Verify CronJobs are created
 oc get cronjobs -n openshift-machine-api
@@ -108,7 +108,7 @@ oc patch cronjob gpu-scale-down -n openshift-machine-api -p '{"spec":{"suspend":
 oc patch cronjob gpu-scale-up -n openshift-machine-api -p '{"spec":{"suspend":false}}'
 
 # Delete automation entirely
-oc delete -k demo/automation/
+oc delete -k demo/components/developer-tools/automation/
 ```
 
 ## Troubleshooting

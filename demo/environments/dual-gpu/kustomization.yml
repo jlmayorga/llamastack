@@ -8,11 +8,12 @@ kind: Kustomization
 namespace: summit-connect-2025
 
 resources:
-  # Base includes: LlamaStack, TrustyAI, playground, shield-registration, workbench
-  - ../../base
+  # Base includes: LlamaStack, TrustyAI, playground, shields, workbench
+  - ../base
   # Model-specific resources for dual GPU
-  - ../../models/llama-3
-  - ../../models/tinyllama
+  - ../../components/inference/llama-3-2-1b
+  - ../../components/inference/tinyllama-1b
+  - ../../components/inference/granite-guardian-hap
 
 # Both models deployed for testing/comparison
 # Note: This requires 2 GPU nodes to avoid resource exhaustion

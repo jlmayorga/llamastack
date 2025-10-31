@@ -2,15 +2,16 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 # Default deployment configuration
-# This references the single-gpu overlay for convenience
+# This references the single-gpu environment for convenience
 #
-# Available overlays:
-#   - overlays/single-gpu/  - Default, deploys tinyllama-1b only (1 GPU required)
-#   - overlays/dual-gpu/    - Deploys both llama32-1b and tinyllama-1b (2 GPUs required)
+# Available environments:
+#   - environments/single-gpu/  - Default, deploys tinyllama-1b + granite-guardian (1 GPU required)
+#   - environments/dual-gpu/    - Deploys llama-3-2-1b + tinyllama-1b + granite-guardian (2 GPUs required)
 #
 # Usage:
 #   Default (single GPU): oc apply -k demo/
-#   Dual GPU:            oc apply -k demo/overlays/dual-gpu/
+#   Dual GPU:            oc apply -k demo/environments/dual-gpu/
+#   Individual component: oc apply -k demo/components/inference/tinyllama-1b/
 
 resources:
-  - overlays/single-gpu
+  - environments/single-gpu
