@@ -1,18 +1,16 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# Default deployment: Single GPU configuration
-# Only deploys tinyllama-1b to avoid GPU exhaustion with 1 GPU node
-# For dual GPU deployment, use: oc apply -k demo/overlays/dual-gpu/
+# Default deployment configuration
+# This references the single-gpu overlay for convenience
+#
+# Available overlays:
+#   - overlays/single-gpu/  - Default, deploys tinyllama-1b only (1 GPU required)
+#   - overlays/dual-gpu/    - Deploys both llama32-1b and tinyllama-1b (2 GPUs required)
+#
+# Usage:
+#   Default (single GPU): oc apply -k demo/
+#   Dual GPU:            oc apply -k demo/overlays/dual-gpu/
 
 resources:
-  - models/tinyllama
-  # Llama 3.2 excluded by default to avoid GPU exhaustion
-  # Uncomment if you have 2+ GPU nodes:
-  # - models/llama-3
-  - llamastack/llamastack-trustyai-fms
-  - llamastack/playground
-  - llamastack/shield-registration
-  - trustyai/trustyai_fms
-
-namespace: summit-connect-2025
+  - overlays/single-gpu

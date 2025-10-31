@@ -8,10 +8,10 @@ kind: Kustomization
 namespace: summit-connect-2025
 
 resources:
+  # Base includes: LlamaStack, TrustyAI, playground, shield-registration, workbench
+  - ../../base
+  # Model-specific resources for single GPU
   - ../../models/tinyllama
-  - ../../llamastack/llamastack-trustyai-fms
-  - ../../llamastack/playground
-  - ../../trustyai/trustyai_fms
 
 # Llama 3.2 is not included to avoid GPU exhaustion
 # If you need Llama 3.2, use the dual-gpu overlay or switch manually
