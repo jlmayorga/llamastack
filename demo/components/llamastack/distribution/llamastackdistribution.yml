@@ -30,7 +30,8 @@ spec:
         - name: VLLM_TLS_VERIFY
           value: 'false'
         - name: FMS_ORCHESTRATOR_URL
-          value: 'http://guardrails-orchestrator-service:8032'
+        # TODO: Figure out why using the internal service name does not work here.
+          value: 'https://guardrails-orchestrator-summit-connect-2025.apps.cluster-5j7rq.5j7rq.sandbox1562.opentlc.com'
       name: llama-stack
       port: 8321
     distribution:
