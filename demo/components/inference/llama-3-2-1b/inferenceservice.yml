@@ -5,6 +5,9 @@ metadata:
     openshift.io/display-name: llama32-1b
     serving.kserve.io/deploymentMode: RawDeployment
   labels:
+    app.kubernetes.io/name: llama32-1b
+    app.kubernetes.io/component: model-serving
+    app.kubernetes.io/part-of: llamastack-trustyai-demo
     networking.kserve.io/visibility: exposed
     opendatahub.io/dashboard: "true"
   name: llama32-1b

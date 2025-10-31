@@ -1,7 +1,11 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: fms-orchestr8-config-nlp
+  name: guardrails-orchestrator-config
+  labels:
+    app.kubernetes.io/name: guardrails-orchestrator-config
+    app.kubernetes.io/component: safety-shields
+    app.kubernetes.io/part-of: llamastack-trustyai-demo
 data:
   config.yaml: |
     detectors:

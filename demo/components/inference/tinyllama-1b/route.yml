@@ -4,6 +4,9 @@ metadata:
   annotations:
     haproxy.router.openshift.io/timeout: 30s
   labels:
+    app.kubernetes.io/name: tinyllama-1b
+    app.kubernetes.io/component: model-serving
+    app.kubernetes.io/part-of: llamastack-trustyai-demo
     inferenceservice-name: tinyllama-1b
   name: tinyllama-1b-predictor
   namespace: summit-connect-2025

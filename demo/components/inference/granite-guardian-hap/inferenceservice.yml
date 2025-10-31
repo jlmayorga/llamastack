@@ -5,6 +5,9 @@ metadata:
     openshift.io/display-name: granite-guardian-hap-38m
     serving.kserve.io/deploymentMode: RawDeployment
   labels:
+    app.kubernetes.io/name: granite-guardian-hap-38m
+    app.kubernetes.io/component: safety-detector
+    app.kubernetes.io/part-of: llamastack-trustyai-demo
     networking.kserve.io/visibility: exposed
     opendatahub.io/dashboard: "true"
   name: granite-guardian-hap-38m

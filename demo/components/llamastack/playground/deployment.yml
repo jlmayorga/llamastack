@@ -4,6 +4,8 @@ metadata:
   name: llamastack-playground-trustyai
   labels:
     app.kubernetes.io/name: llamastack-playground-trustyai
+    app.kubernetes.io/component: ui
+    app.kubernetes.io/part-of: llamastack-trustyai-demo
     app.kubernetes.io/version: "latest"
 spec:
   replicas: 1

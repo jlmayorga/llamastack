@@ -3,7 +3,11 @@ kind: Route
 metadata:
   annotations:
     openshift.io/host.generated: "true"
-  name: llamastack
+  labels:
+    app.kubernetes.io/name: llamastack-trustyai-fms
+    app.kubernetes.io/component: orchestration
+    app.kubernetes.io/part-of: llamastack-trustyai-demo
+  name: llamastack-trustyai-fms
   namespace: summit-connect-2025
 spec:
   path: /

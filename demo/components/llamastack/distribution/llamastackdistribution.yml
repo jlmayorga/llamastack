@@ -3,6 +3,10 @@ kind: LlamaStackDistribution
 metadata:
   name: llamastack-trustyai-fms
   namespace: summit-connect-2025
+  labels:
+    app.kubernetes.io/name: llamastack-trustyai-fms
+    app.kubernetes.io/component: orchestration
+    app.kubernetes.io/part-of: llamastack-trustyai-demo
 spec:
   replicas: 1
   server:

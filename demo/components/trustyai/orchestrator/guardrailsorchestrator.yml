@@ -2,8 +2,12 @@ apiVersion: trustyai.opendatahub.io/v1alpha1
 kind: GuardrailsOrchestrator
 metadata:
   name: guardrails-orchestrator
+  labels:
+    app.kubernetes.io/name: guardrails-orchestrator
+    app.kubernetes.io/component: safety-shields
+    app.kubernetes.io/part-of: llamastack-trustyai-demo
 spec:
-  orchestratorConfig: "fms-orchestr8-config-nlp"
+  orchestratorConfig: "guardrails-orchestrator-config"
   enableBuiltInDetectors: true
   enableGuardrailsGateway: false
   otelexporter: {}

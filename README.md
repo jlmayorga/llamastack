@@ -420,7 +420,7 @@ oc exec -n summit-connect-2025 deployment/llamastack-trustyai-fms -- curl http:/
 oc logs -n summit-connect-2025 -l app=guardrails-orchestrator --tail=100
 
 # Verify shield configuration
-oc get configmap fms-orchestr8-config-nlp -n summit-connect-2025 -o yaml
+oc get configmap guardrails-orchestrator-config -n summit-connect-2025 -o yaml
 ```
 
 ### Playground Won't Load

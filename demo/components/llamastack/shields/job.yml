@@ -8,7 +8,7 @@ metadata:
     app: llamastack-shield-registration
     app.kubernetes.io/name: llamastack-shield-registration
     app.kubernetes.io/component: shield-registration
-    app.kubernetes.io/part-of: llamastack-trustyai-fms
+    app.kubernetes.io/part-of: llamastack-trustyai-demo
 spec:
   # Allow 3 retries if the job fails
   backoffLimit: 3
