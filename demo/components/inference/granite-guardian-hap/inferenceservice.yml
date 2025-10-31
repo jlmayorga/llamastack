@@ -2,8 +2,10 @@ apiVersion: serving.kserve.io/v1beta1
 kind: InferenceService
 metadata:
   annotations:
-    openshift.io/display-name: granite-guardian-hap-38m
+    openshift.io/display-name: "Granite Guardian HAP 38M"
     serving.kserve.io/deploymentMode: RawDeployment
+    app.openshift.io/runtime: ml-model
+    app.openshift.io/runtime-version: "38m"
   labels:
     app.kubernetes.io/name: granite-guardian-hap-38m
     app.kubernetes.io/component: safety-detector

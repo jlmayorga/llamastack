@@ -3,6 +3,7 @@ kind: Route
 metadata:
   annotations:
     haproxy.router.openshift.io/timeout: 30s
+    openshift.io/display-name: "TinyLlama 1B API Route"
   labels:
     app.kubernetes.io/name: tinyllama-1b
     app.kubernetes.io/component: model-serving

@@ -3,6 +3,7 @@ kind: Route
 metadata:
   annotations:
     haproxy.router.openshift.io/timeout: 30s
+    openshift.io/display-name: "Llama 3.2 1B API Route"
   labels:
     app.kubernetes.io/name: llama32-1b
     app.kubernetes.io/component: model-serving

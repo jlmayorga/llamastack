@@ -2,8 +2,10 @@ apiVersion: serving.kserve.io/v1beta1
 kind: InferenceService
 metadata:
   annotations:
-    openshift.io/display-name: tinyllama-1b
+    openshift.io/display-name: "TinyLlama 1B Chat"
     serving.kserve.io/deploymentMode: RawDeployment
+    app.openshift.io/runtime: llm
+    app.openshift.io/runtime-version: "1.1b"
   labels:
     app.kubernetes.io/name: tinyllama-1b
     app.kubernetes.io/component: model-serving

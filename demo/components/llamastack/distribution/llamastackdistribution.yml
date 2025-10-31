@@ -3,6 +3,11 @@ kind: LlamaStackDistribution
 metadata:
   name: llamastack-trustyai-fms
   namespace: summit-connect-2025
+  annotations:
+    openshift.io/display-name: "LlamaStack Orchestrator"
+    app.openshift.io/connects-to: '[{"apiVersion":"apps/v1","kind":"Service","name":"guardrails-orchestrator-service"},{"apiVersion":"serving.kserve.io/v1beta1","kind":"InferenceService","name":"tinyllama-1b"}]'
+    app.openshift.io/runtime: python
+    app.openshift.io/runtime-version: "3.11"
   labels:
     app.kubernetes.io/name: llamastack-trustyai-fms
     app.kubernetes.io/component: orchestration
@@ -25,7 +30,7 @@ spec:
         - name: VLLM_TLS_VERIFY
           value: 'false'
         - name: FMS_ORCHESTRATOR_URL
-          value: 'http://guardrails-orchestrator-service:8033'
+          value: 'http://guardrails-orchestrator-service:8032'
       name: llama-stack
       port: 8321
     distribution:

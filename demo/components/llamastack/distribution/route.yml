@@ -3,6 +3,7 @@ kind: Route
 metadata:
   annotations:
     openshift.io/host.generated: "true"
+    openshift.io/display-name: "LlamaStack API Route"
   labels:
     app.kubernetes.io/name: llamastack-trustyai-fms
     app.kubernetes.io/component: orchestration

@@ -4,6 +4,10 @@ kind: Job
 metadata:
   name: llamastack-shield-registration
   namespace: summit-connect-2025
+  annotations:
+    openshift.io/display-name: "Shield Registration Job"
+    app.openshift.io/connects-to: '[{"apiVersion":"llamastack.io/v1alpha1","kind":"LlamaStackDistribution","name":"llamastack-trustyai-fms"}]'
+    app.openshift.io/runtime: bash
   labels:
     app: llamastack-shield-registration
     app.kubernetes.io/name: llamastack-shield-registration

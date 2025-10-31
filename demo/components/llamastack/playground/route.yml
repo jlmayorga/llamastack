@@ -2,6 +2,8 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: llamastack-playground-trustyai
+  annotations:
+    openshift.io/display-name: "LlamaStack Playground UI Route"
   labels:
     app.kubernetes.io/name: llamastack-playground-trustyai
     app.kubernetes.io/component: ui
